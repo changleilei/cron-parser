@@ -32,7 +32,7 @@ public class HoursDescriptionBuilder extends AbstractDescriptionBuilder {
     @Override
     protected String getIntervalDescriptionFormat(String expression) {
         if (options.getLocale().equals(Locale.CHINA)||options.getLocale().equals(Locale.CHINESE)){
-            return MessageFormat.format(I18nMessages.get("interval_description_format"), expression) + I18nMessages.get("seconds");
+            return MessageFormat.format(I18nMessages.get("interval_description_format"), expression) + I18nMessages.get("hour");
         }
         return MessageFormat.format(I18nMessages.get("every_x")+ getSpace(options) +
                 plural(expression, I18nMessages.get("hour"), I18nMessages.get("hours")), expression);
