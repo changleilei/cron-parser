@@ -72,11 +72,11 @@ class ExpressionParser {
         expressionParts[5] = expressionParts[5].startsWith("1/") ? expressionParts[5].replace("1/", "*/") : expressionParts[5]; // DOW
 
         // convert */1 to *
-        for (int i = 0; i < expressionParts.length; i++) {
-            if ("*/1".equals(expressionParts[i])) {
-                expressionParts[i] = "*";
-            }
-        }
+//        for (int i = 0; i < expressionParts.length; i++) {
+//            if ("*/1".equals(expressionParts[i])) {
+//                expressionParts[i] = "*";
+//            }
+//        }
 
         // convert SUN-SAT format to 0-6 format
         if(!StringUtils.isNumeric(expressionParts[5])) {
