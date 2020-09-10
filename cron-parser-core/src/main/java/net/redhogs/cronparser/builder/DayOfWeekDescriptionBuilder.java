@@ -57,6 +57,9 @@ public class DayOfWeekDescriptionBuilder extends AbstractDescriptionBuilder {
 
     @Override
     protected String getIntervalDescriptionFormat(String expression) {
+        if (options.getLocale().equals(Locale.CHINA)||options.getLocale().equals(Locale.CHINESE)){
+            return MessageFormat.format(I18nMessages.get("interval_description_format"), expression) + I18nMessages.get("day");
+        }
         return MessageFormat.format(", "+I18nMessages.get("interval_description_format"), expression);
     }
 
@@ -95,6 +98,11 @@ public class DayOfWeekDescriptionBuilder extends AbstractDescriptionBuilder {
     @Override
     protected Boolean needSpaceBetweenWords() {
         return options.isNeedSpaceBetweenWords();
+    }
+
+    @Override
+    protected String getBeginDescriptionFormat(String expression) {
+        return ", "+MessageFormat.format(I18nMessages.get("begin_description_format"), expression)+I18nMessages.get("day")+I18nMessages.get("begin");
     }
 
 }

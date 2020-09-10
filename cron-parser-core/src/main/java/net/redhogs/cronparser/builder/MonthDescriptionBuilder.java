@@ -5,6 +5,7 @@ import net.redhogs.cronparser.Options;
 import org.joda.time.DateTime;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 
 /**
  * @author grhodes
@@ -24,6 +25,10 @@ public class MonthDescriptionBuilder extends AbstractDescriptionBuilder {
 
     @Override
     protected String getIntervalDescriptionFormat(String expression) {
+        if (options.getLocale().equals(Locale.CHINESE)|| options.getLocale().equals(Locale.CHINA)){
+            return MessageFormat.format(I18nMessages.get("interval_description_format")+"个"+ getSpace(options) +
+                    plural(expression, I18nMessages.get("month"), I18nMessages.get("months")), expression);
+        }
         return MessageFormat.format(", "+I18nMessages.get("every_x")+ getSpace(options) +
                 plural(expression, I18nMessages.get("month"), I18nMessages.get("months")), expression);
     }
@@ -42,6 +47,11 @@ public class MonthDescriptionBuilder extends AbstractDescriptionBuilder {
     @Override
     protected Boolean needSpaceBetweenWords() {
         return options.isNeedSpaceBetweenWords();
+    }
+
+    @Override
+    protected String getBeginDescriptionFormat(String expression) {
+        return ", "+MessageFormat.format(I18nMessages.get("begin_description_format"), expression)+I18nMessages.get("month")+I18nMessages.get("begin");
     }
 
 }

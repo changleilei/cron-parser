@@ -41,8 +41,14 @@ public abstract class AbstractDescriptionBuilder {
                     String betweenSegmentOfInterval = segments[0];
                     String[] betweenSegments = betweenSegmentOfInterval.split("-");
                     description = MessageFormat.format(getBetweenDescriptionFormat(betweenSegmentOfInterval, false), getSingleItemDescription(betweenSegments[0]), getSingleItemDescription(betweenSegments[1]));
+                    description += MessageFormat.format(getIntervalDescriptionFormat(segments[1]), getSingleItemDescription(segments[1]));
+                }else {
+                    if ("*".equals(segments[0])){
+                        description += ", " + MessageFormat.format(getIntervalDescriptionFormat(segments[1]), getSingleItemDescription(segments[1]));
+                    }else {
+                        description += ", " + getBeginDescriptionFormat(segments[0]) +MessageFormat.format(getIntervalDescriptionFormat(segments[1]), getSingleItemDescription(segments[1]));
+                    }
                 }
-                description += ", " + MessageFormat.format(getIntervalDescriptionFormat(segments[1]), getSingleItemDescription(segments[1]));
             }else {
                 description = MessageFormat.format(getIntervalDescriptionFormat(segments[1]), getSingleItemDescription(segments[1]));
                 // interval contains 'between' piece (e.g. 2-59/3)
@@ -142,6 +148,7 @@ public abstract class AbstractDescriptionBuilder {
         return plural(String.valueOf(num), singular, plural);
     }
 
+    protected abstract String getBeginDescriptionFormat(String expression);
     /**
      * @param expression
      * @param singular

@@ -5,6 +5,7 @@ import net.redhogs.cronparser.I18nMessages;
 import net.redhogs.cronparser.Options;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 
 /**
  * @author grhodes
@@ -23,6 +24,9 @@ public class MinutesDescriptionBuilder extends AbstractDescriptionBuilder {
 
     @Override
     protected String getIntervalDescriptionFormat(String expression) {
+        if (options.getLocale().equals(Locale.CHINA)||options.getLocale().equals(Locale.CHINESE)){
+            return MessageFormat.format(I18nMessages.get("interval_description_format"), expression) + I18nMessages.get("minute");
+        }
         return MessageFormat.format(I18nMessages.get("every_x") + getSpace(options) + minPlural(expression), expression);
     }
 
@@ -40,6 +44,11 @@ public class MinutesDescriptionBuilder extends AbstractDescriptionBuilder {
     @Override
     protected Boolean needSpaceBetweenWords() {
         return options.isNeedSpaceBetweenWords();
+    }
+
+    @Override
+    protected String getBeginDescriptionFormat(String expression) {
+        return ", "+MessageFormat.format(I18nMessages.get("begin_description_format"), expression)+I18nMessages.get("minute")+I18nMessages.get("begin");
     }
 
     private String minPlural(String expression) {
