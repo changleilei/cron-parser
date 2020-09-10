@@ -1,6 +1,7 @@
 package net.redhogs.cronparser.builder;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import net.redhogs.cronparser.I18nMessages;
 import net.redhogs.cronparser.Options;
@@ -24,6 +25,9 @@ public class YearDescriptionBuilder extends AbstractDescriptionBuilder {
 
     @Override
     protected String getIntervalDescriptionFormat(String expression) {
+        if (options.getLocale().equals(Locale.CHINA)||options.getLocale().equals(Locale.CHINESE)){
+            return MessageFormat.format(I18nMessages.get("interval_description_format"), expression) + I18nMessages.get("years");
+        }
         return MessageFormat.format(", " + I18nMessages.get("every_x")+ getSpace(options) +
           plural(expression, I18nMessages.get("year"), I18nMessages.get("years")), expression);
     }
@@ -42,5 +46,10 @@ public class YearDescriptionBuilder extends AbstractDescriptionBuilder {
     @Override
     protected Boolean needSpaceBetweenWords() {
         return options.isNeedSpaceBetweenWords();
+    }
+
+    @Override
+    protected String getBeginDescriptionFormat(String expression) {
+        return ", "+MessageFormat.format(I18nMessages.get("begin_description_format"), expression)+I18nMessages.get("year")+I18nMessages.get("begin");
     }
 }
