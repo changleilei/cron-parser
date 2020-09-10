@@ -186,18 +186,30 @@ public class CronExpressionDescriptor {
         // Handle special cases first
         boolean isChineseLocale = locale.equals(Locale.CHINA) || locale.equals(Locale.CHINESE);
         if (!StringUtils.containsAny(minutesExpression, specialCharacters) && !StringUtils.containsAny(hoursExpression, specialCharacters) && !StringUtils.containsAny(secondsExpression, specialCharacters)) {
+            String desTemp = DateAndTimeUtils.formatTime(hoursExpression, minutesExpression, secondsExpression, opts);
             if (!isChineseLocale){
                 description.append(I18nMessages.get("at"));
             }
             if(opts.isNeedSpaceBetweenWords()){
                 description.append(" ");
             }
-            description.append(DateAndTimeUtils.formatTime(hoursExpression, minutesExpression, secondsExpression, opts)); // Specific time of day (e.g. 10 14)
+            // 凌晨、上午、中午、下午、晚上
+            if(isChineseLocale){
+                desTemp = chineseTypeDescription(desTemp, hoursExpression);
+            }
+            description.append(desTemp); // Specific time of day (e.g. 10 14)
         } else if (minutesExpression.contains("-") && !minutesExpression.contains("/") && !StringUtils.containsAny(hoursExpression, specialCharacters)) {
             // Minute range in single hour (e.g. 0-10 11)
             String[] minuteParts = minutesExpression.split("-");
-            description.append(MessageFormat.format(I18nMessages.get("every_minute_between"), DateAndTimeUtils.formatTime(hoursExpression, minuteParts[0], opts),
-                    DateAndTimeUtils.formatTime(hoursExpression, minuteParts[1], opts)));
+
+            String hoursWithMinutePartZero = DateAndTimeUtils.formatTime(hoursExpression, minuteParts[0], opts);
+            String hoursWithMinutePartOne = DateAndTimeUtils.formatTime(hoursExpression, minuteParts[1], opts);
+            if (isChineseLocale){
+                hoursWithMinutePartZero = chineseTypeDescription(hoursWithMinutePartZero, hoursExpression);
+                hoursWithMinutePartOne = chineseTypeDescription(hoursWithMinutePartOne, hoursExpression);
+            }
+            description.append(MessageFormat.format(I18nMessages.get("every_minute_between"), hoursWithMinutePartZero,
+                    hoursWithMinutePartOne));
         } else if (hoursExpression.contains(",") && !StringUtils.containsAny(minutesExpression, specialCharacters)) {
             // Hours list with single minute (e.g. 30 6,14,16)
             String[] hourParts = hoursExpression.split(",");
@@ -208,7 +220,11 @@ public class CronExpressionDescriptor {
                 if (opts.isNeedSpaceBetweenWords()) {
                     description.append(" ");
                 }
-                description.append(DateAndTimeUtils.formatTime(hourParts[i], minutesExpression, opts));
+                String hoursDes = DateAndTimeUtils.formatTime(hourParts[i], minutesExpression, opts);
+                if (isChineseLocale){
+                    hoursDes = chineseTypeDescription(hoursDes, hourParts[i]);
+                }
+                description.append(hoursDes);
                 if (i < hourParts.length - 2) {
                     description.append(",");
                 }
@@ -226,11 +242,10 @@ public class CronExpressionDescriptor {
             String result = "";
             if (isChineseLocale){
                 result = MessageFormat.format(", {0}, {1}, {2}", hoursDescription, minutesDescription, secondsDescription);
-                description.append(result);
             }else {
                 result = MessageFormat.format("{0}, {1}, {2}", secondsDescription, minutesDescription, hoursDescription);
-                description.append(result);
             }
+            description.append(result);
         }
         return description.toString();
     }
@@ -248,9 +263,9 @@ public class CronExpressionDescriptor {
         String dayOfWeekDesc = getDayOfWeekDescription(expressionParts, options, locale);
         String yearDesc = getYearDescription(expressionParts, options, locale);
         if (locale.equals(Locale.CHINESE)||locale.equals(Locale.CHINA)){
-            description = MessageFormat.format("{0}{1}{2}{3}", yearDesc,(expressionParts[5].length()>1 ? "":monthDesc), ("*".equals(expressionParts[3]) ? dayOfWeekDesc : dayOfMonthDesc), timeSegment);
+            description = MessageFormat.format("{0}{1}{2}{3}", yearDesc, monthDesc, ("*".equals(expressionParts[3]) ? dayOfWeekDesc : dayOfMonthDesc), timeSegment);
         }else {
-            description = MessageFormat.format("{0}{1}{2}{3}", timeSegment, ("*".equals(expressionParts[3]) ? dayOfWeekDesc : dayOfMonthDesc), (expressionParts[5].length()>1 ? "":monthDesc), yearDesc);
+            description = MessageFormat.format("{0}{1}{2}{3}", timeSegment, ("*".equals(expressionParts[3]) ? dayOfWeekDesc : dayOfMonthDesc), monthDesc, yearDesc);
         }
         description = transformVerbosity(description, options, locale, expressionParts).trim();
         description = transformCase(description, options);
@@ -294,14 +309,13 @@ public class CronExpressionDescriptor {
                 descTemp = descTemp.replace(", "+ I18nMessages.get("every_hour"), "");
                 descTemp = descTemp.replace(", "+ I18nMessages.get("every_day"), "");
                 descTemp = descTemp.replace(", " + I18nMessages.get("every_year"), "");
-            }else if (expressionParts[1].length()!=0&&!"0".equals(expressionParts[1])){
-                descTemp = descTemp.replace(", "+ I18nMessages.get("every_hour"), "");
-                descTemp = descTemp.replace(", "+ I18nMessages.get("every_day"), "");
+            }else if (expressionParts[1].length()!=0){
+//                descTemp = descTemp.replace(", "+ I18nMessages.get("every_hour"), "");
+//                descTemp = descTemp.replace(", "+ I18nMessages.get("every_day"), "");
 
                 descTemp = descTemp.replace(", " + I18nMessages.get("every_year"), "");
             }else {
                 descTemp = descTemp.replace(", "+ I18nMessages.get("every_day"), "");
-
                 descTemp = descTemp.replace(", " + I18nMessages.get("every_year"), "");
             }
 
@@ -310,6 +324,27 @@ public class CronExpressionDescriptor {
             descTemp = descTemp.replaceAll("[, ]", "");
         }
         return descTemp;
+    }
+
+    public static String chineseTypeDescription(String raw, String hoursExpression){
+
+        int hours = Integer.parseInt(hoursExpression);
+        // 0-6点为凌晨
+        if (hours>=0&&hours<=6){
+            return raw.replace("上午", "凌晨");
+        }else if (hours>6&& hours<=10){
+            // 7-10上午
+            return raw;
+        }else if(hours>=11 && hours<=13){
+            //11-13中午
+            return raw.replaceFirst("[上|下]午", "中午");
+        }else if(hours>=14&&hours<=18){
+            return raw;
+        }else if(hours>=19&&hours<=23){
+            return raw.replace("下午", "晚上");
+        }else {
+            return raw;
+        }
     }
 
 }
