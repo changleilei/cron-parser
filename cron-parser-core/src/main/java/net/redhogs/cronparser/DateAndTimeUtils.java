@@ -33,8 +33,8 @@ public final class DateAndTimeUtils {
      * @return
      */
     public static String formatTime(String hoursExpression, String minutesExpression, String secondsExpression, Options opts) {
-        int hour = Integer.parseInt(hoursExpression);
-        int minutes = Integer.parseInt(minutesExpression);
+        int hour = hoursExpression.length()==0? 0: Integer.parseInt(hoursExpression);
+        int minutes = minutesExpression.length()==0? 0: Integer.parseInt(minutesExpression);
 
         LocalTime localTime;
         DateTimeFormatter timeFormat;
