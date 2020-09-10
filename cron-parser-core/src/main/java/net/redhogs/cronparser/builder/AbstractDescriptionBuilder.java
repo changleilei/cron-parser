@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 
 /**
  * @author grhodes
@@ -15,30 +16,54 @@ public abstract class AbstractDescriptionBuilder {
 
     protected final char[] SpecialCharsMinusStar = new char[] { '/', '-', ',' };
 
-    public String getSegmentDescription(String expression, String allDescription) {
+    public String getSegmentDescription(String expression, String allDescription, Locale locale) {
         String description = "";
+        boolean isChineseLocale = locale.equals(Locale.CHINA)||locale.equals(Locale.CHINESE);
         if (StringUtils.isEmpty(expression)) {
             description = "";
         } else if ("*".equals(expression)) {
             description = allDescription;
         } else if (!StringUtils.containsAny(expression, SpecialCharsMinusStar)) {
-            description = MessageFormat.format(getDescriptionFormat(expression), getSingleItemDescription(expression));
+            String temp = getDescriptionFormat(expression);
+            if (isChineseLocale){
+                String[] terms = temp.split("，");
+                if (terms.length==2){
+                    temp = terms[1]+terms[0];
+                }else {
+                    temp = terms[0];
+                }
+            }
+            description = MessageFormat.format(temp, getSingleItemDescription(expression));
         } else if (expression.contains("/")) {
             String[] segments = expression.split("/");
-            description = MessageFormat.format(getIntervalDescriptionFormat(segments[1]), getSingleItemDescription(segments[1]));
-            // interval contains 'between' piece (e.g. 2-59/3)
-            if (segments[0].contains("-")) {
-                String betweenSegmentOfInterval = segments[0];
-                String[] betweenSegments = betweenSegmentOfInterval.split("-");
-                description += ", " + MessageFormat.format(getBetweenDescriptionFormat(betweenSegmentOfInterval, false), getSingleItemDescription(betweenSegments[0]), getSingleItemDescription(betweenSegments[1]));
+            if (isChineseLocale){
+                if (segments[0].contains("-")) {
+                    String betweenSegmentOfInterval = segments[0];
+                    String[] betweenSegments = betweenSegmentOfInterval.split("-");
+                    description = MessageFormat.format(getBetweenDescriptionFormat(betweenSegmentOfInterval, false), getSingleItemDescription(betweenSegments[0]), getSingleItemDescription(betweenSegments[1]));
+                }
+                description += ", " + MessageFormat.format(getIntervalDescriptionFormat(segments[1]), getSingleItemDescription(segments[1]));
+            }else {
+                description = MessageFormat.format(getIntervalDescriptionFormat(segments[1]), getSingleItemDescription(segments[1]));
+                // interval contains 'between' piece (e.g. 2-59/3)
+                if (segments[0].contains("-")) {
+                    String betweenSegmentOfInterval = segments[0];
+                    String[] betweenSegments = betweenSegmentOfInterval.split("-");
+                    description += ", " + MessageFormat.format(getBetweenDescriptionFormat(betweenSegmentOfInterval, false), getSingleItemDescription(betweenSegments[0]), getSingleItemDescription(betweenSegments[1]));
+                }
             }
+
         } else if (expression.contains(",")) {
             String[] segments = expression.split(",");
             StringBuilder descriptionContent = new StringBuilder();
             for (int i = 0; i < segments.length; i++) {
                 if ((i > 0) && (segments.length > 2)) {
                     if (i < (segments.length - 1)) {
-                        descriptionContent.append(", ");
+                        if(isChineseLocale){
+                            descriptionContent.append("、");
+                        }else {
+                            descriptionContent.append(", ");
+                        }
                     }
                 }
                 if ((i > 0) && (segments.length > 1) && ((i == (segments.length - 1)) || (segments.length == 2))) {
@@ -57,7 +82,17 @@ public abstract class AbstractDescriptionBuilder {
                     descriptionContent.append(getSingleItemDescription(segments[i]));
                 }
             }
-            description = MessageFormat.format(getDescriptionFormat(expression), descriptionContent.toString());
+            String temp = getDescriptionFormat(expression);
+            String tempContentDes = descriptionContent.toString();
+            if (isChineseLocale){
+                String[] terms = temp.split("，");
+                if (terms.length==2){
+                    temp = terms[1]+terms[0];
+                }else {
+                    temp = terms[0];
+                }
+            }
+            description = MessageFormat.format(temp, tempContentDes);
         } else if (expression.contains("-")) {
             String[] segments = expression.split("-");
             description = MessageFormat.format(getBetweenDescriptionFormat(expression, false), getSingleItemDescription(segments[0]), getSingleItemDescription(segments[1]));
