@@ -25,3 +25,22 @@ cron-parser is available in the [maven central repository](http://search.maven.o
 **Usage Examples (Unit Tests)**
 
 See [CronExpressionDescriptorTest](/cron-parser-core/src/test/java/net/redhogs/cronparser/CronExpressionDescriptorTest.java)
+
+**修改中文的CronParserI18N_zh.properties**
+
+使解析的Cron表达式符合国人使用习惯。
+
+例：
+
+```
+cronExp = "0 0 2 1 * ? *";
+```
+
+原始解析结果为： 在上午2:00, 在当月的1日
+
+现解析结果：每月1日上午2:00
+
+具体可查看CronExpressionDescriptorZHTest文件。
+
+若想使用原版，请访问原版git
+
