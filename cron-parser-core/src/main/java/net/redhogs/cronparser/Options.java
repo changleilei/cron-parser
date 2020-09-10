@@ -1,5 +1,7 @@
 package net.redhogs.cronparser;
 
+import java.util.Locale;
+
 /**
  * @author grhodes
  * @since 10 Dec 2012 10:58:44
@@ -13,7 +15,7 @@ public class Options {
     private boolean twentyFourHourTime;
     /** Chinese, Japanese, Korean and other East Asian languages have no spaces between words */
     private boolean needSpaceBetweenWords;
-
+    private Locale locale;
     public Options() {
         this.throwExceptionOnParseError = true;
         this.casingType = CasingTypeEnum.Sentence;
@@ -22,6 +24,7 @@ public class Options {
         this.zeroBasedDayOfWeek = true;
         this.twentyFourHourTime = false;
         this.needSpaceBetweenWords = true;
+        this.locale = Locale.ENGLISH;
     }
 
     public static Options twentyFourHour() {
@@ -122,5 +125,13 @@ public class Options {
 
     public void setNeedSpaceBetweenWords(boolean needSpaceBetweenWords) {
         this.needSpaceBetweenWords = needSpaceBetweenWords;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 }
