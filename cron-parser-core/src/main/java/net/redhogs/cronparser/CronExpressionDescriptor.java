@@ -131,11 +131,18 @@ public class CronExpressionDescriptor {
      */
     private static String getDayOfMonthDescription(String[] expressionParts, Options options, Locale locale) {
         String description = null;
+
         String exp = expressionParts[3].replace("?", "*");
+        Pattern lastPattern = Pattern.compile("(\\dL)");
+        Matcher lastMatcher = lastPattern.matcher(exp);
         if ("L".equals(exp)) {
             description = ", "+I18nMessages.get("on_the_last_day_of_the_month");
         } else if ("WL".equals(exp) || "LW".equals(exp)) {
             description = ", "+I18nMessages.get("on_the_last_weekday_of_the_month");
+        }else if(lastMatcher.matches()){
+            char[] chars = exp.toCharArray();
+            String dayOfWeek = String.valueOf(chars[0]);
+            description = ", " + MessageFormat.format(I18nMessages.get("on_the_last_of_the_month"), DateAndTimeUtils.getDayOfWeekName(Integer.parseInt(dayOfWeek)));
         } else {
             Pattern pattern = Pattern.compile("(\\dW)|(W\\d)");
             Matcher matcher = pattern.matcher(exp);
